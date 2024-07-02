@@ -1,7 +1,10 @@
+# chat_node.py
+
 import socket
 from threading import Thread
-from logical_clock import LogicalClock, send_message_with_timestamp, process_message
 import uuid
+from logical_clock import *
+from fault_tolerance import *
 
 # ANSI color escape sequences
 GREEN = '\033[92m'
@@ -14,12 +17,6 @@ def init_node(ip, port):
     sock.bind((ip, port))
     return sock
 
-def send_message(sock, message, address):
-    try:
-        sock.sendto(message.encode(), address)
-        print(f"\n{GREEN}Sent message to {address[0]}:{address[1]}{RESET}")
-    except socket.error as e:
-        print(f"{RED}Failed to send message to {address}: {e}{RESET}")
 
 def listen_for_messages(sock, clock, neighbors):
     while True:
@@ -27,6 +24,7 @@ def listen_for_messages(sock, clock, neighbors):
             data, addr = sock.recvfrom(1024)
             message = data.decode()
             process_message(message, addr, clock, neighbors)
+            receive_and_deduplicate(message, addr, neighbors)
         except socket.error as e:
             print(f"{RED}Error receiving message: {e}{RESET}")
         except Exception as e:
@@ -40,7 +38,7 @@ if __name__ == "__main__":
     sock = init_node(ip_address, port)
     clock = LogicalClock()
 
-    neighbors = {}  # Dictionary to store neighbors in the format {(ip, port): neighbor_id}
+    neighbors = {} 
 
     Thread(target=listen_for_messages, args=(sock, clock, neighbors), daemon=True).start()
     
@@ -52,6 +50,7 @@ if __name__ == "__main__":
         print("\nCommands: meet <ip> <port>, broadcast <message>, dm")
         user_input = input("Enter command: ").strip()
         
+        ############## Meet Neighbor ############## 
         if user_input.startswith("meet"):
             _, neighbor_ip, neighbor_port = user_input.split()
             neighbor_address = (neighbor_ip, int(neighbor_port))
@@ -61,6 +60,7 @@ if __name__ == "__main__":
             send_message(sock, message, neighbor_address)
             print(f"{GREEN}Met neighbor at {neighbor_ip}:{neighbor_port} with id {neighbor_id}{RESET}")
         
+        ############## Broadcast ##############
         elif user_input.startswith("broadcast"):
             if not neighbors:
                 print(f"{RED}No neighbors to broadcast message to.{RESET}")
@@ -74,6 +74,7 @@ if __name__ == "__main__":
             else:
                 print(f"{RED}Please provide a message to broadcast.{RESET}")
         
+        ############## Direct Message ##############
         elif user_input.startswith("dm"):
             if not neighbors:
                 print(f"{RED}No neighbors to send message to.{RESET}")
@@ -90,7 +91,8 @@ if __name__ == "__main__":
                     neighbor_addr = list(neighbors.keys())[choice - 1]
                     message = input("Enter your message: ").strip()
                     if message:
-                        send_message_with_timestamp(sock, message, neighbor_addr, clock)
+                        msgSend = f"dm|{message}"
+                        send_message_with_timestamp(sock, msgSend, neighbor_addr, clock)
                         print(f"\n{GREEN}Sent message '{message}' to {neighbor_addr[0]}:{neighbor_addr[1]}{RESET}")
                     else:
                         print(f"{RED}Please enter a non-empty message.{RESET}")
@@ -99,5 +101,6 @@ if __name__ == "__main__":
             else:
                 print(f"{RED}Invalid input. Please enter a number.{RESET}")
         
+        ############## Invalid Command ##############
         else:
             print(f"{RED}Invalid command. Please enter 'meet', 'broadcast', or 'dm'.{RESET}")
