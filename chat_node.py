@@ -58,7 +58,7 @@ if __name__ == "__main__":
             neighbors[neighbor_address] = neighbor_id
             message = f"meet|{ip_address}|{port}"
             send_message(sock, message, neighbor_address)
-            print(f"{GREEN}Met neighbor at {neighbor_ip}:{neighbor_port} with id {neighbor_id}{RESET}")
+            print(f"\n{GREEN}Met neighbor at {neighbor_ip}:{neighbor_port} with id {neighbor_id}{RESET}")
         
         ############## Broadcast ##############
         elif user_input.startswith("broadcast"):
