@@ -11,7 +11,11 @@ BOLD = '\033[1;37m'
 
 def main():
     # Configuration of the local IP address
-    ip_address = get_local_ip_address()
+    try:
+        ip_address = get_local_ip()
+    except Exception as e:
+        print(f"{RED}Error determining local IP address: {e}{RESET}")
+        return
     
     # Check available ports on the local IP address
     available_ports = check_available_ports(ip_address)
@@ -19,13 +23,17 @@ def main():
         print(f"{RED}No available ports. Exiting...{RESET}")
         exit(1)
 
-    # Choose the first available port and username
+    # Choose the first available port
     port = available_ports[0]
     print(f"Assigned port: {port}")
     username = input("Enter username: ")
-    
-    # Initialize the socket for this node
-    sock = init_node(ip_address, port)
+
+    try:
+        # Initialize the socket for this node
+        sock = init_node(ip_address, port)
+    except Exception as e:
+        print(f"{RED}Error initializing node: {e}{RESET}")
+        return
 
     # Initialize the logical clock for this node
     clock = LogicalClock()

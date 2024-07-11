@@ -8,18 +8,16 @@ BLUE = '\033[94m'
 DARK_CYAN = '\033[36m'
 BOLD = '\033[1;37m'
 
-# Function to get the local IP address of the machine
-def get_local_ip_address():
+# Function to get the local IP address
+def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # doesn't need to be reachable
-        s.connect(('10.254.254.254', 1))
-        ip_address = s.getsockname()[0]
-    except Exception:
-        ip_address = '127.0.0.1'
+        # Connect to a public DNS server to get the local IP address
+        s.connect(('8.8.8.8', 80))
+        local_ip = s.getsockname()[0]
     finally:
         s.close()
-    return ip_address
+    return local_ip
 
 # Function to check available ports on a given IP address
 def check_available_ports(ip_address):
@@ -36,6 +34,7 @@ def check_available_ports(ip_address):
             s.close()
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     available_ports = [port for port in range(min_port, max_port + 1) if port not in used_ports]
+    print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
     print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
     return available_ports
 
@@ -73,7 +72,11 @@ def process_message(message, addr, clock, neighbors):
     parts = message.split("|")
     if len(parts) == 3 and parts[2] == "timestamp":
         message = parts[0]
-        received_time = int(parts[1])
+        try:
+            received_time = int(parts[1])
+        except ValueError:
+            print(f"{RED}Received invalid timestamp: {parts[1]}{RESET}")
+            return
         clock.update(received_time)
         if message.startswith("dm-"):
             private_message = message.split("-")[2]
@@ -90,7 +93,11 @@ def process_message(message, addr, clock, neighbors):
 # Function to initialize a node with a given IP address and port
 def init_node(ip, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((ip, port))
+    try:
+        sock.bind((ip, port))
+    except socket.error as e:
+        print(f"{RED}Failed to bind socket: {e}{RESET}")
+        raise
     return sock
 
 # Function to listen for incoming messages from neighbors
