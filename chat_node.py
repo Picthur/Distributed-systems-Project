@@ -7,6 +7,7 @@ from utils import *
 GREEN = '\033[92m'
 RED = '\033[91m'
 RESET = '\033[0m'
+BOLD = '\033[1;37m'
 
 def main():
     # Configuration de l'adresse IP locale
@@ -36,7 +37,7 @@ def main():
 
     while True:
         # Lecture du message à envoyer depuis l'utilisateur
-        message = input("Enter message: ")
+        message = input(f"\n{BOLD}Enter message:{RESET} ")
 
         if message.startswith("@"):
             ############## PRIVATE MESSAGE ##############
@@ -51,7 +52,7 @@ def main():
                     # Envoi du message privé avec horodatage à l'adresse du voisin cible
                     target_addr = (ip_address, target_port)
                     send_message_with_timestamp(sock, f"dm-{private_message}", target_addr, clock)
-                    print(f"\n{GREEN}Sent private message '{private_message}' to {ip_address}:{target_port}{RESET}")
+                    print(f"{GREEN}Sent private message '{private_message}' to {ip_address}:{target_port}{RESET}")
                 else:
                     # Affichage d'une erreur si le port cible n'est pas un voisin connecté
                     print(f"{RED}Port {target_port} is not a connected neighbor.{RESET}")
@@ -62,14 +63,15 @@ def main():
             ############## BROADCAST MESSAGE ############
             used_ports = get_used_ports(ip_address)
             for neighbor_port in used_ports:
-                neighbor_addr = (ip_address, neighbor_port)
-                try:
-                    # Envoi du message broadcast avec horodatage à tous les voisins connectés
-                    send_message_with_timestamp(sock, message, neighbor_addr, clock)
-                except socket.error as e:
-                    # Affichage d'une erreur si l'envoi du message a échoué
-                    print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
-            print(f"\n{GREEN}Broadcasted message '{message}' to all neighbors.{RESET}")
+                if neighbor_port != port:
+                    neighbor_addr = (ip_address, neighbor_port)
+                    try:
+                        # Envoi du message broadcast avec horodatage à tous les voisins connectés
+                        send_message_with_timestamp(sock, message, neighbor_addr, clock)
+                    except socket.error as e:
+                        # Affichage d'une erreur si l'envoi du message a échoué
+                        print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
+            print(f"{GREEN}Broadcasted message '{message}' to all neighbors.{RESET}")
 
 if __name__ == "__main__":
     main()

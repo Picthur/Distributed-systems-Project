@@ -5,6 +5,8 @@ GREEN = '\033[92m'
 RED = '\033[91m'
 RESET = '\033[0m'
 BLUE = '\033[94m'
+DARK_CYAN = '\033[36m'
+BOLD = '\033[1;37m'
 
 
 # Function to check available ports on a given IP address
@@ -22,7 +24,7 @@ def check_available_ports(ip_address):
             s.close()
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     available_ports = [port for port in range(min_port, max_port + 1) if port not in used_ports]
-    print(f"\nUsed ports: {sorted(used_ports)}")
+    print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
     return available_ports
 
 
@@ -56,11 +58,10 @@ def send_message_with_timestamp(sock, message, address, clock):
     clock.tick()
     timestamped_message = f"{message}|{clock.time}|timestamp"
     send_message(sock, timestamped_message, address)
-    print(f"Sent message '{message}' to {address[0]}:{address[1]}")
 
 
 # Function to process incoming messages from neighbors and update the logical clock
-def process_message(message, addr, clock):
+def process_message(message, addr, clock, neighbors):
     parts = message.split("|")
     if len(parts) == 3 and parts[2] == "timestamp":
         message = parts[0]
@@ -70,7 +71,7 @@ def process_message(message, addr, clock):
             private_message = message[3:]
             print(f"\n{BLUE}Private message from {addr[0]}:{addr[1]}: {private_message}{RESET}")
         else:
-            print(f"\n{GREEN}{addr[0]}:{addr[1]}: {message}{RESET}")
+            print(f"\n{DARK_CYAN}{addr[0]}:{addr[1]}:{RESET} {message}")
     else:
         print(f"\n{RED}Invalid message format from {addr}: {message}{RESET}")
 
