@@ -22,7 +22,6 @@ def main():
     # Choose the first available port and username
     port = available_ports[0]
     print(f"Assigned port: {port}")
-    username = input(f"\n{BOLD}Enter username:{RESET} ")
     
     # Initialize the socket for this node
     sock = init_node(ip_address, port)

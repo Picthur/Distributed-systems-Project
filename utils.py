@@ -24,7 +24,8 @@ def check_available_ports(ip_address):
             s.close()
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     available_ports = [port for port in range(min_port, max_port + 1) if port not in used_ports]
-    print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
+    nbr_connected = len(used_ports)
+    print(f"\nUser connected : {BOLD}{nbr_connected}{RESET}")
     return available_ports
 
 
