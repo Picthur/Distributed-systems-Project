@@ -10,54 +10,55 @@ RESET = '\033[0m'
 BOLD = '\033[1;37m'
 
 def main():
-    # Configuration de l'adresse IP locale
+    # Configuration of the local IP address
     ip_address = "localhost"
     
-    # Vérification des ports disponibles sur l'adresse IP locale
+    # Check available ports on the local IP address
     available_ports = check_available_ports(ip_address)
     if not available_ports:
         print(f"{RED}No available ports. Exiting...{RESET}")
         exit(1)
 
-    # Choix du premier port disponible
+    # Choose the first available port and username
     port = available_ports[0]
     print(f"Assigned port: {port}")
-
-    # Initialisation du socket pour ce nœud
+    username = input(f"\n{BOLD}Enter username:{RESET} ")
+    
+    # Initialize the socket for this node
     sock = init_node(ip_address, port)
 
-    # Initialisation de l'horloge logique pour ce nœud
+    # Initialize the logical clock for this node
     clock = LogicalClock()
 
-    # Initialisation du dictionnaire des voisins connectés
+    # Initialize the dictionary of connected neighbors
     neighbors = {}
 
-    # Démarrage du thread d'écoute des messages entrants en arrière-plan
+    # Start the background thread to listen for incoming messages
     Thread(target=listen_for_messages, args=(sock, clock, neighbors), daemon=True).start()
 
     while True:
-        # Lecture du message à envoyer depuis l'utilisateur
+        # Read the message to be sent from the user
         message = input(f"\n{BOLD}Enter message:{RESET} ")
 
         if message.startswith("@"):
             ############## PRIVATE MESSAGE ##############
             try:
-                # Extraction du port cible du message privé
+                # Extract the target port for the private message
                 target_port = int(message.split()[0][1:])
-                # Extraction du message privé à envoyer
+                # Extract the private message to be sent
                 private_message = " ".join(message.split()[1:])
                 neighbor_addr = (ip_address, target_port)
                 used_ports = get_used_ports(ip_address)
                 if target_port in used_ports:
-                    # Envoi du message privé avec horodatage à l'adresse du voisin cible
+                    # Send the private message with a timestamp to the target neighbor address
                     target_addr = (ip_address, target_port)
                     send_message_with_timestamp(sock, f"dm-{private_message}", target_addr, clock)
                     print(f"{GREEN}Sent private message '{private_message}' to {ip_address}:{target_port}{RESET}")
                 else:
-                    # Affichage d'une erreur si le port cible n'est pas un voisin connecté
+                    # Display an error if the target port is not a connected neighbor
                     print(f"{RED}Port {target_port} is not a connected neighbor.{RESET}")
             except ValueError:
-                # Affichage d'une erreur si le format du port est incorrect
+                # Display an error if the port format is incorrect
                 print(f"{RED}Invalid port specified.{RESET}")
         else:
             ############## BROADCAST MESSAGE ############
@@ -66,10 +67,10 @@ def main():
                 if neighbor_port != port:
                     neighbor_addr = (ip_address, neighbor_port)
                     try:
-                        # Envoi du message broadcast avec horodatage à tous les voisins connectés
+                        # Send the broadcast message with a timestamp to all connected neighbors
                         send_message_with_timestamp(sock, message, neighbor_addr, clock)
                     except socket.error as e:
-                        # Affichage d'une erreur si l'envoi du message a échoué
+                        # Display an error if sending the message failed
                         print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
             print(f"{GREEN}Broadcasted message '{message}' to all neighbors.{RESET}")
 
