@@ -1,5 +1,3 @@
-# utils.py
-
 import socket
 
 # ANSI color escape sequences
@@ -62,7 +60,7 @@ def send_message_with_timestamp(sock, message, address, clock):
 
 
 # Function to process incoming messages from neighbors and update the logical clock
-def process_message(message, addr, clock, neighbors):
+def process_message(message, addr, clock):
     parts = message.split("|")
     if len(parts) == 3 and parts[2] == "timestamp":
         message = parts[0]

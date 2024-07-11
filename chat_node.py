@@ -1,5 +1,3 @@
-# chat_node.py
-
 import socket
 from threading import Thread
 from logical_clock import LogicalClock

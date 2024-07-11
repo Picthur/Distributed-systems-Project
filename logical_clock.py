@@ -1,7 +1,3 @@
-# logical_clock.py
-
-import socket
-
 # ANSI color escape sequences
 GREEN = '\033[92m'
 RED = '\033[91m'
