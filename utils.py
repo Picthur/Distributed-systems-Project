@@ -35,7 +35,6 @@ def check_available_ports(ip_address):
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     available_ports = [port for port in range(min_port, max_port + 1) if port not in used_ports]
     print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
-    print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
     return available_ports
 
 # Function to get the used ports on a given IP address
@@ -81,11 +80,11 @@ def process_message(message, addr, clock, neighbors):
         if message.startswith("dm-"):
             private_message = message.split("-")[2]
             sender_username = message.split("-")[1]
-            print(f"\n{BLUE}Private message from {sender_username}:{RESET} {private_message}")
+            print(f"\n{BLUE}Private message [{addr[0]}]{sender_username}:{RESET} {private_message}")
         else:
             sender_username = message.split("-")[0]
             actual_message = "-".join(message.split("-")[1:])
-            print(f"\n{DARK_CYAN}{sender_username}:{RESET} {actual_message}")
+            print(f"\n{DARK_CYAN}[{addr[1]}] {sender_username}:{RESET} {actual_message}")
     else:
         username = neighbors[addr[1]]
         print(f"\n{RED}Invalid message format from {username}:{RESET} {message}")

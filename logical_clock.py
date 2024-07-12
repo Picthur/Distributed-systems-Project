@@ -12,6 +12,7 @@ class LogicalClock:
         self.time += 1
 
     def update(self, received_time):
+        # Check if the received timestamp is valid 
         if not isinstance(received_time, int):
             print(f"{RED}Received invalid timestamp: {received_time}{RESET}")
             return
