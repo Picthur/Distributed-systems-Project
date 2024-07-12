@@ -34,7 +34,7 @@ def check_available_ports(ip_address):
             s.close()
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     available_ports = [port for port in range(min_port, max_port + 1) if port not in used_ports]
-    print(f"\nUsed ports: {BOLD}{sorted(used_ports)}{RESET}")
+    print(f"\nUser connected: {BOLD} {len(used_ports)} {RESET}")
     return available_ports
 
 # Function to get the used ports on a given IP address
@@ -69,6 +69,7 @@ def send_message_with_timestamp(sock, message, address, clock):
 # Function to process incoming messages from neighbors and update the logical clock
 def process_message(message, addr, clock, neighbors):
     parts = message.split("|")
+    print(f"\nfull message: {message}")
     if len(parts) == 3 and parts[2] == "timestamp":
         message = parts[0]
         try:
