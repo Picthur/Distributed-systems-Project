@@ -2,6 +2,10 @@
 
 This project implements a distributed chat system using the User Datagram Protocol (UDP). It allows up to 10 users to connect and exchange messages efficiently and quickly over a local network.
 
+### Gourp members
+- Timothée FOUGERON
+- Arthur BUISSON
+
 ## Features
 
 - **Connection and Disconnection:**
