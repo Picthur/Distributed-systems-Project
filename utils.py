@@ -69,7 +69,6 @@ def send_message_with_timestamp(sock, message, address, clock):
 # Function to process incoming messages from neighbors and update the logical clock
 def process_message(message, addr, clock, neighbors):
     parts = message.split("|")
-    print(f"\nfull message: {message}")
     if len(parts) == 3 and parts[2] == "timestamp":
         message = parts[0]
         try:
@@ -81,7 +80,7 @@ def process_message(message, addr, clock, neighbors):
         if message.startswith("dm-"):
             private_message = message.split("-")[2]
             sender_username = message.split("-")[1]
-            print(f"\n{BLUE}Private message [{addr[0]}]{sender_username}:{RESET} {private_message}")
+            print(f"\n{BLUE}Private message [{addr[1]}]{sender_username}:{RESET} {private_message}")
         else:
             sender_username = message.split("-")[0]
             actual_message = "-".join(message.split("-")[1:])

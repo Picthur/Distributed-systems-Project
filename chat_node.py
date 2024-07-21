@@ -75,14 +75,14 @@ def main():
             ############## BROADCAST MESSAGE ############
             used_ports = get_used_ports(ip_address)
             for neighbor_port in used_ports:
-                if neighbor_port != port:
-                    neighbor_addr = (ip_address, neighbor_port)
-                    try:
-                       # Send the broadcast message with a timestamp and username to all connected neighbors
-                        send_message_with_timestamp(sock, f"{username}-{message}", neighbor_addr, clock)
-                    except socket.error as e:
-                        # Display an error if sending the message failed
-                        print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
+                # if neighbor_port != port:
+                neighbor_addr = (ip_address, neighbor_port)
+                try:
+                    # Send the broadcast message with a timestamp and username to all connected neighbors
+                    send_message_with_timestamp(sock, f"{username}-{message}", neighbor_addr, clock)
+                except socket.error as e:
+                    # Display an error if sending the message failed
+                    print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
             print(f"{GREEN}Broadcasted message '{message}' to all neighbors.{RESET}")
 
 if __name__ == "__main__":
