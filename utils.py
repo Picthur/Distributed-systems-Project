@@ -67,7 +67,7 @@ def send_message_with_timestamp(sock, message, address, clock):
     send_message(sock, timestamped_message, address)
 
 # Function to process incoming messages from neighbors and update the logical clock
-def process_message(message, addr, clock, neighbors):
+def process_message(message, addr, clock, neighbors, port):
     parts = message.split("|")
     if len(parts) == 3 and parts[2] == "timestamp":
         message = parts[0]
@@ -76,7 +76,9 @@ def process_message(message, addr, clock, neighbors):
         except ValueError:
             print(f"{RED}Received invalid timestamp: {parts[1]}{RESET}")
             return
+        
         clock.update(received_time)
+
         if message.startswith("dm-"):
             private_message = message.split("-")[2]
             sender_username = message.split("-")[1]
@@ -84,7 +86,10 @@ def process_message(message, addr, clock, neighbors):
         else:
             sender_username = message.split("-")[0]
             actual_message = "-".join(message.split("-")[1:])
-            print(f"\n{DARK_CYAN}[{addr[1]}] {sender_username}:{RESET} {actual_message}")
+            if addr[1] == port:
+                print(f"\n{DARK_CYAN}You :{RESET} {actual_message}")
+            else:
+                print(f"\n{DARK_CYAN}[{addr[1]}] {sender_username}:{RESET} {actual_message}")
     else:
         username = neighbors[addr[1]]
         print(f"\n{RED}Invalid message format from {username}:{RESET} {message}")
@@ -100,12 +105,12 @@ def init_node(ip, port):
     return sock
 
 # Function to listen for incoming messages from neighbors
-def listen_for_messages(sock, clock, neighbors):
+def listen_for_messages(sock, clock, neighbors, port):
     while True:
         try:
             data, addr = sock.recvfrom(1024)
             message = data.decode()
-            process_message(message, addr, clock, neighbors)
+            process_message(message, addr, clock, neighbors, port)
         except socket.error as e:
             if e.errno != 10054:
                 print(f"{RED}Error receiving message: {e}{RESET}")

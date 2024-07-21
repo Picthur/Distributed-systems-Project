@@ -45,7 +45,7 @@ def main():
     neighbors[port] = username
 
     # Start the background thread to listen for incoming messages
-    Thread(target=listen_for_messages, args=(sock, clock, neighbors), daemon=True).start()
+    Thread(target=listen_for_messages, args=(sock, clock, neighbors, port), daemon=True).start()
 
     while True:
         # Read the message to be sent from the user
