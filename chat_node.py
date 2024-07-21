@@ -8,10 +8,16 @@ GREEN = '\033[92m'
 RED = '\033[91m'
 RESET = '\033[0m'
 BOLD = '\033[1;37m'
+UNDERLINE = '\033[4m'
 
 def main():
     # Configuration of the local IP address
-    ip_address = "localhost"
+    try:
+        ip_address = get_local_ip()
+    except Exception as e:
+        print(f"{RED}Error determining local IP address: {e}{RESET}")
+        return
+    # ip_address = "localhost"
     
     # Check available ports on the local IP address
     available_ports = check_available_ports(ip_address)
@@ -21,19 +27,25 @@ def main():
 
     # Choose the first available port and username
     port = available_ports[0]
-    print(f"Assigned port: {port}")
-    
-    # Initialize the socket for this node
-    sock = init_node(ip_address, port)
+    print(f"Assigned port: {UNDERLINE}{port}{RESET}")
+    username = input("Enter username: ")
+
+    try:
+        # Initialize the socket for this node
+        sock = init_node(ip_address, port)
+    except Exception as e:
+        print(f"{RED}Error initializing node: {e}{RESET}")
+        return
 
     # Initialize the logical clock for this node
     clock = LogicalClock()
 
-    # Initialize the dictionary of connected neighbors
+    # Initialize the dictionary of connected neighbors and usernames
     neighbors = {}
+    neighbors[port] = username
 
     # Start the background thread to listen for incoming messages
-    Thread(target=listen_for_messages, args=(sock, clock, neighbors), daemon=True).start()
+    Thread(target=listen_for_messages, args=(sock, clock, neighbors, port), daemon=True).start()
 
     while True:
         # Read the message to be sent from the user
@@ -49,9 +61,9 @@ def main():
                 neighbor_addr = (ip_address, target_port)
                 used_ports = get_used_ports(ip_address)
                 if target_port in used_ports:
-                    # Send the private message with a timestamp to the target neighbor address
+                    # Send the private message with a timestamp and username to the target neighbor address
                     target_addr = (ip_address, target_port)
-                    send_message_with_timestamp(sock, f"dm-{private_message}", target_addr, clock)
+                    send_message_with_timestamp(sock, f"dm-{username}-{private_message}", target_addr, clock)
                     print(f"{GREEN}Sent private message '{private_message}' to {ip_address}:{target_port}{RESET}")
                 else:
                     # Display an error if the target port is not a connected neighbor
@@ -63,14 +75,13 @@ def main():
             ############## BROADCAST MESSAGE ############
             used_ports = get_used_ports(ip_address)
             for neighbor_port in used_ports:
-                if neighbor_port != port:
-                    neighbor_addr = (ip_address, neighbor_port)
-                    try:
-                        # Send the broadcast message with a timestamp to all connected neighbors
-                        send_message_with_timestamp(sock, message, neighbor_addr, clock)
-                    except socket.error as e:
-                        # Display an error if sending the message failed
-                        print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
+                neighbor_addr = (ip_address, neighbor_port)
+                try:
+                    # Send the broadcast message with a timestamp and username to all connected neighbors
+                    send_message_with_timestamp(sock, f"{username}-{message}", neighbor_addr, clock)
+                except socket.error as e:
+                    # Display an error if sending the message failed
+                    print(f"{RED}Failed to send message to {neighbor_addr}: {e}{RESET}")
             print(f"{GREEN}Broadcasted message '{message}' to all neighbors.{RESET}")
 
 if __name__ == "__main__":
