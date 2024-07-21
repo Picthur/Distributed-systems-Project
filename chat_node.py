@@ -75,7 +75,6 @@ def main():
             ############## BROADCAST MESSAGE ############
             used_ports = get_used_ports(ip_address)
             for neighbor_port in used_ports:
-                # if neighbor_port != port:
                 neighbor_addr = (ip_address, neighbor_port)
                 try:
                     # Send the broadcast message with a timestamp and username to all connected neighbors
